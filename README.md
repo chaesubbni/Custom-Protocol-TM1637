@@ -37,7 +37,8 @@
 ---
 
 ## 🔬 TM1637 데이터시트 기반 프로토콜 연동
-<img width="866" height="306" alt="image" src="https://github.com/user-attachments/assets/ae8af659-dc8f-458f-bd98-70e24a4aef23" />
+<img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
+
 
 TM1637 공식 데이터시트의 통신 규격을 바탕으로, 타이밍 마진을 고려한 소프트웨어 드라이버를 직접 설계했습니다.
 
