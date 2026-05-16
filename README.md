@@ -43,4 +43,10 @@
 * 비교 일치 신호는 `TIFR0` 플래그를 깨우는 동시에 우측의 **Waveform Generation** 모듈을 트리거합니다.
 * 레지스터 스위치인 `COMnx1:0` 비트 설정(예: CTC 모드의 Toggle 설정)에 따라 내부 파형 연산이 수행되며, 출력 신호가 하드웨어 라인을 타고 물리 핀 바로 앞까지 전송됩니다.
 * 회로도 최하단에 명시된 대로, 아무리 타이머 하드웨어가 완벽한 파형을 만들어도 사용자가 해당 포트의 **DDR(데이터 방향 레지스터)을 출력(`1`)으로 활성화하지 않으면** 데이터 버스의 문이 열리지 않아 실제 외부 핀(`OCnA`)으로 전기 신호가 방출되지 않습니다.
-     
+
+## 📖 System Logic Flow
+1. **Initialize:** 타이머 레지스터 설정 및 인터럽트 전역 허용(`sei()`).
+2. **Gate Control:** Prescaler 박자에 맞춰 `clk_Tn` MUX 활성화, `TCNTn` 카운트 업.
+3. **Compare & Masking:** 하드웨어 비교 일치 후 플래그 MUX 활성화 -> `clk_I/O` 에지에서 `TIFR0` 1로 확정.
+4. **ISR Execution:** CPU 명령어 종료 시점 샘플링 -> PC값 스택 저장 후 `ISR(TIMER0_COMPA_vect)` 진입 및 플래그 자동 초기화.
+5. **Display:** 10ms 단위 인터럽트 100회 누적 시 `seconds` 변수 갱신 및 7-Segment 출력 시프트.
