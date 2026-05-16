@@ -17,6 +17,7 @@
 ## Core Register Configuration
 
 본 프로젝트에서 타임 베이스(1ms 단위) 생성을 위해 조작한 핵심 레지스터 세팅 흐름입니다.
+<img width="837" height="663" alt="image (7)" src="https://github.com/user-attachments/assets/bde96929-d2ce-4379-a454-bd5fb53daedf" />
 
 ### 1. TCCR0A / TCCR0B (Timer/Counter Control Register)
 * **`WGM01 = 1`**: 카운터가 특정 값에 도달하면 0으로 초기화되는 **CTC 모드** 활성화.
