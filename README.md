@@ -1,6 +1,7 @@
 # ATmega328P-Real-Time-Clock-Base
 
 - 본 프로젝트는 ATmega328P 내부 8비트 Timer/Counter 0을 정밀하게 제어하여 소프트웨어 루프의 간섭 엎이 정확한 1초 타임 베이스를 생성하고 이를 7-Segment에 표시하는 시스템을 구현했습니다.
+- 즉, 데이터시트의 타이밍 차트를 분석해 TM1637 제어용 직렬 통신 프로토콜을 소프트웨어로 직접 구현했습니다.
 
 ## 📖 System Logic Flow
 1. **Initialize:** 타이머 레지스터 설정 및 인터럽트 전역 허용(`sei()`).
