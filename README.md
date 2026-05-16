@@ -2,15 +2,12 @@
 
 - 본 프로젝트는 ATmega328P 내부 8비트 Timer/Counter 0을 정밀하게 제어하여 소프트웨어 루프의 간섭 엎이 정확한 1초 타임 베이스를 생성하고 이를 7-Segment에 표시하는 시스템을 구현했습니다.
 
-### 흐름
-- Clock Calculation
-  - 16MHz 시스템 클럭을 1024 Prescaler로 분주하여 타이머 주파수를 하향 조정.
-  - 8비트 타이머의 물리적 한계를 극복하기 위해 하드웨어 인터럽트(10ms)와 소프트웨어 카운터(x100)를 결합하여 정확한 1.000초를 구현.
-- Register-Level Hardware Control
-  - TCCR0A/B: 데이터시트 기반의 레지스터 직접 조작을 통해 CTC 모드 활성화.
-  - OCR0A Mapping: 비교 일치 값을 156으로 설정하여 정밀한 인터럽트 주기 생성.
-  - TIMSK0: OCIE0A 비트 활성화를 통한 비동기적 사건 처리.
-  - 인터럽트 전역 허용 - sei()
+## 📖 System Logic Flow
+1. **Initialize:** 타이머 레지스터 설정 및 인터럽트 전역 허용(`sei()`).
+2. **Gate Control:** Prescaler 박자에 맞춰 `clk_Tn` MUX 활성화, `TCNTn` 카운트 업.
+3. **Compare & Masking:** 하드웨어 비교 일치 후 플래그 MUX 활성화 -> `clk_I/O` 에지에서 `TIFR0` 1로 확정.
+4. **ISR Execution:** CPU 명령어 종료 시점 샘플링 -> PC값 스택 저장 후 `ISR(TIMER0_COMPA_vect)` 진입 및 플래그 자동 초기화.
+5. **Display:** 10ms 단위 인터럽트 100회 누적 시 `seconds` 변수 갱신 및 7-Segment 출력 시프트.
 
 ### 회로도도 본 PWM 생성 흐름(!!핵심!!) - 하드웨어 고려해 코드 작성할 때 필요한 역량 - 나의 추구미
 - ATmega328P 데이터시트의 **Figure 14-1(Block Diagram)** 및 내부 타이밍 다이어그램 분석을 통해 도출한 하드웨어 동기화 흐름입니다.
@@ -44,9 +41,4 @@
 * 레지스터 스위치인 `COMnx1:0` 비트 설정(예: CTC 모드의 Toggle 설정)에 따라 내부 파형 연산이 수행되며, 출력 신호가 하드웨어 라인을 타고 물리 핀 바로 앞까지 전송됩니다.
 * 회로도 최하단에 명시된 대로, 아무리 타이머 하드웨어가 완벽한 파형을 만들어도 사용자가 해당 포트의 **DDR(데이터 방향 레지스터)을 출력(`1`)으로 활성화하지 않으면** 데이터 버스의 문이 열리지 않아 실제 외부 핀(`OCnA`)으로 전기 신호가 방출되지 않습니다.
 
-## 📖 System Logic Flow
-1. **Initialize:** 타이머 레지스터 설정 및 인터럽트 전역 허용(`sei()`).
-2. **Gate Control:** Prescaler 박자에 맞춰 `clk_Tn` MUX 활성화, `TCNTn` 카운트 업.
-3. **Compare & Masking:** 하드웨어 비교 일치 후 플래그 MUX 활성화 -> `clk_I/O` 에지에서 `TIFR0` 1로 확정.
-4. **ISR Execution:** CPU 명령어 종료 시점 샘플링 -> PC값 스택 저장 후 `ISR(TIMER0_COMPA_vect)` 진입 및 플래그 자동 초기화.
-5. **Display:** 10ms 단위 인터럽트 100회 누적 시 `seconds` 변수 갱신 및 7-Segment 출력 시프트.
+
