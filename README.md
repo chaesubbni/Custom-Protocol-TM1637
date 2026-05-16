@@ -16,6 +16,7 @@
 ---
 
 ## ⚙️ Core Register Configuration
+<img width="880" height="685" alt="image" src="https://github.com/user-attachments/assets/4762adae-5cbd-4483-bf7a-f9e183b1b5e2" />
 
 본 프로젝트에서 타임 베이스(1ms 단위) 생성을 위해 조작한 핵심 레지스터 세팅 흐름입니다.
 
@@ -36,6 +37,8 @@
 ---
 
 ## 🔬 TM1637 데이터시트 기반 프로토콜 연동
+<img width="866" height="306" alt="image" src="https://github.com/user-attachments/assets/ae8af659-dc8f-458f-bd98-70e24a4aef23" />
+
 TM1637 공식 데이터시트의 통신 규격을 바탕으로, 타이밍 마진을 고려한 소프트웨어 드라이버를 직접 설계했습니다.
 
 * **Start/Stop Condition:** `CLK`이 High일 때 `DIO` 선의 에지 변화를 제어하여 통신의 시작과 종료 신호를 구현.
