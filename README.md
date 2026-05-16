@@ -1,45 +1,43 @@
 # ATmega328P-Real-Time-Clock-Base
 
-- 본 프로젝트는 ATmega328P 내부 8비트 Timer/Counter 0을 정밀하게 제어하여 소프트웨어 루프의 간섭 엎이 정확한 1초 타임 베이스를 생성하고 이를 7-Segment에 표시하는 시스템을 구현했습니다.
-- 즉, 데이터시트의 타이밍 차트를 분석해 TM1637 제어용 직렬 통신 프로토콜을 소프트웨어로 직접 구현했습니다.
+본 프로젝트는 **ATmega328P**의 내부 8비트 하드웨어 타이머(**Timer/Counter0**)를 제어하여, 소프트웨어 루프의 간섭 없이 정확한 **1초(1Hz)** 타임 베이스를 생성하고 이를 디지털 디스플레이(TM1637)에 표시하는 시스템을 구현합니다.
+
+## 📌 Project Overview
+단순한 `_delay_ms()` 함수 사용을 지양하고, MCU의 하드웨어 자원인 **CTC(Clear Timer on Compare Match) 모드**와 **Interrupt**를 활용하여 CPU 효율을 극대화했습니다. 추가로, 외부 라이브러리에 의존하지 않고 TM1637 디스플레이 제어용 2-Wire 직렬 통신 프로토콜을 소프트웨어(Bit-banging)로 직접 구현했습니다.
+
+## 🛠 Tech Stack & Environment
+* **MCU:** ATmega328P (16MHz External Crystal)
+* **Development:** Microchip Studio / AVR-GCC
+* **Protocol:** GPIO (Bit-banging), Timer/Counter0 (CTC Mode)
+* **Hardware:** TM1637 4-Digit 7-Segment Display Module
+
+---
+
+## ⚙️ Core Register Configuration
+
+본 프로젝트에서 타임 베이스(1ms 단위) 생성을 위해 조작한 핵심 레지스터 세팅 흐름입니다.
+
+### 1. TCCR0A / TCCR0B (Timer/Counter Control Register)
+* **`WGM01 = 1`**: 카운터가 특정 값에 도달하면 0으로 초기화되는 **CTC 모드** 활성화.
+* **`CS01 = 1, CS00 = 1`**: 16MHz 시스템 클럭을 **64 분주(Prescaler)**하여 타이머 클럭으로 사용. (1클럭당 4µs)
+
+### 2. OCR0A (Output Compare Register A)
+* **`OCR0A = 249`**: 1ms 주기를 만들기 위한 비교 일치 기준값 설정. 
+  *(4µs × 250 = 1000µs = 1ms. 0부터 카운트하므로 250 - 1 = 249)*
+
+### 3. TIMSK0 (Timer/Counter Interrupt Mask Register)
+* **`OCIE0A = 1`**: TCNT0 값과 OCR0A 값이 일치할 때(1ms 마다) 발생하는 하드웨어 **인터럽트를 허용(Enable)**.
+
+### 4. SREG (Status Register)
+* **`I-bit = 1 (sei())`**: 시스템 전역 인터럽트 활성화.
+
+---
 
 ## 📖 System Logic Flow
-1. **Initialize:** 타이머 레지스터 설정 및 인터럽트 전역 허용(`sei()`).
-2. **Gate Control:** Prescaler 박자에 맞춰 `clk_Tn` MUX 활성화, `TCNTn` 카운트 업.
-3. **Compare & Masking:** 하드웨어 비교 일치 후 플래그 MUX 활성화 -> `clk_I/O` 에지에서 `TIFR0` 1로 확정.
-4. **ISR Execution:** CPU 명령어 종료 시점 샘플링 -> PC값 스택 저장 후 `ISR(TIMER0_COMPA_vect)` 진입 및 플래그 자동 초기화.
-5. **Display:** 10ms 단위 인터럽트 100회 누적 시 `seconds` 변수 갱신 및 7-Segment 출력 시프트.
 
-### 회로도로 본 PWM 생성 흐름 타이밍 분석 - 하드웨어 고려해 코드 작성할 때 필요한 역량 - 나의 추구미
-- ATmega328P 데이터시트의 **Figure 14-1(Block Diagram)** 및 내부 타이밍 다이어그램 분석을 통해 도출한 하드웨어 동기화 흐름입니다.
-<img width="837" height="663" alt="image (7)" src="https://github.com/user-attachments/assets/ad92808f-f30c-410a-81f5-c68d94a23939" />
+1. **Initialize:** 타이머 및 직렬 통신용 GPIO 핀 방향(DDR) 설정.
+2. **Interrupt Trigger:** 백그라운드에서 하드웨어 타이머가 작동하며 **정확히 1ms마다** `TIMER0_COMPA_vect` ISR(인터럽트 서비스 루틴) 호출.
+3. **Time Accumulation:** ISR 내부에서 카운터(`ms_count`)를 증가시키며, 1000회(1초) 누적 시 `time_updated` 플래그를 Set.
+4. **Asynchronous Display:** 메인 루프(`while(1)`)는 평소에 대기하다가, 플래그가 켜지면 TM1637 모듈과 통신하여 화면의 숫자를 갱신.
 
-- 먼저 clk_Tn은 모든 데이터 경로(TCNTn, 플래그 레지스터 등)의 길목을 통제하는 Mux 활성화 신호(허가 스위치)라는 점을 인지해야 함.
-- clk_I/O랑은 다른 역할. clk_I/O는 캡처 역할임. high edge에서 업데이트 하거나 clk_Tn값을 확인하는 그런 느낌임.
-
-### 1. 입력 및 카운터(TCNTn) 업데이트 단계
-* 본 시스템은 외부 핀 분주 대신 내부 클럭을 Prescaler로 늦춘 신호를 타이머 클럭 소스로 채택합니다.
-* 내부 타이머 레지스터를 실제로 구동하는 진짜 심장은 **`clk_I/O` (시스템 클럭)**입니다.
-* **`clk_Tn`은 물리적인 클럭 선이 아니라, 프리스케일러 하드웨어가 던져주는 "이번 턴에 데이터 경로를 열어도 좋다"는 1주기짜리 'MUX 활성화 신호'입니다.**
-* `clk_I/O`가 High Edge일 때, 이 `clk_Tn` 값이 `1`인 경우에만 내부 MUX가 활성화되어 하드웨어 덧셈기(Control Logic)와 `TCNTn` 레지스터가 연결됩니다.
-* Control Logic에서 계산된 `TCNTn + 1` 값이 `TCNTn` 레지스터 D-FF의 입력 `D`단에 저장되며, **바로 다음 `clk_I/O`의 High Edge 때 Q값으로 업데이트**되면서 카운터 값이 최종 반영됩니다.
-
-### 2. 비교 일치(Compare Match) 및 플래그 세팅 단계
-* 비교기(Comparator)는 완전한 하드웨어 로직이므로, 업데이트되는 `TCNTn` 값과 사용자가 설정한 `OCRnx` 레지스터 값을 상시 비교하고 있습니다.
-* `TCNTn == OCRnx`가 만족되는 순간 비교기는 즉시 `1` 신호를 뿜어내지만, 플래그 레지스터(`TIFR0`) 앞을 지키는 MUX 역시 **`clk_Tn` 신호에 의해 제어**됩니다.
-* `clk_Tn`이 `Low`인 구간(분주비에 따른 대기 사이클) 동안에는 MUX가 문을 닫고 있으므로 플래그 레지스터에 값이 기록되지 못하고 입력단에서 대기합니다.
-* 이후 `clk_I/O` 에지에서 `clk_Tn`이 `1`인 것이 확인되는 순간 MUX가 활성화되어 `1` 신호가 플래그 레지스터 D-FF의 `D`단으로 진입합니다.
-* **그 직후 도달하는 `clk_I/O` High Edge 때 플래그 레지스터 값이 업데이트되어 공식적으로 `1`로 셋(Set) 됩니다.** (데이터시트 Figure 14-9에서 `TOVn` 및 `OCFnx`가 MAX/BOTTOM 직후 에지에서 올라가는 이유입니다.)
-
-### 3. CPU 인터럽트 감지 및 실행 단계
-* 시스템 클럭(`clk_I/O`) 박자에 맞춰 플래그 레지스터 비트가 `1`로 확정되면, CPU 인터럽트 컨트롤러로 요청 신호가 전달됩니다.
-* CPU는 현재 실행 중인 기계어 명령(Instruction)의 마지막 사이클(High 레벨 유지 구간 끝자락)에서 인터럽트 라인을 감시(Sampling)합니다.
-* 전역 인터럽트 허용 비트(`SREG`의 I비트)와 마스크 레지스터(`TIMSK0`)의 해당 비트가 모두 `1`임이 확인되면, CPU는 다음 `clk_I/O` 상승 에지에서 원래 실행하려던 명령어 대신 **인터럽트 서비스 루틴(ISR)**으로의 하드웨어 점프 동작을 시작합니다.
-* **모든 판단과 실행 타이밍은 `clk_Tn`이 아닌 시스템 기본 클럭인 `clk_I/O` 박자에 맞춰 정밀하게 정렬됩니다.**
-
-### 4. 파형 생성 및 물리 핀(OCnA) 출력 단계 - (이 프로젝트에선 안 함)
-* 비교 일치 신호는 `TIFR0` 플래그를 깨우는 동시에 우측의 **Waveform Generation** 모듈을 트리거합니다.
-* 레지스터 스위치인 `COMnx1:0` 비트 설정(예: CTC 모드의 Toggle 설정)에 따라 내부 파형 연산이 수행되며, 출력 신호가 하드웨어 라인을 타고 물리 핀 바로 앞까지 전송됩니다.
-* 회로도 최하단에 명시된 대로, 아무리 타이머 하드웨어가 완벽한 파형을 만들어도 사용자가 해당 포트의 **DDR(데이터 방향 레지스터)을 출력(`1`)으로 활성화하지 않으면** 데이터 버스의 문이 열리지 않아 실제 외부 핀(`OCnA`)으로 전기 신호가 방출되지 않습니다.
-
-
+> 🔗 **Deep Dive:** 내부 클럭 동기화(MUX 제어) 및 플래그 D-FF 업데이트 타이밍에 대한 상세한 하드웨어 분석은 [개인 기술 블로그 링크 삽입 예정]에서 확인하실 수 있습니다.
