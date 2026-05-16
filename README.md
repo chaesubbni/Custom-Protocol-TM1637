@@ -12,7 +12,7 @@
   - TIMSK0: OCIE0A 비트 활성화를 통한 비동기적 사건 처리.
   - 인터럽트 전역 허용 - sei()
 
-### 회로도도 본 PWM 생성 흐름(!!핵심!!) - 하드웨어 고려해 코드 작성하는 방법의 핵심 - 나의 추구미
+### 회로도도 본 PWM 생성 흐름(!!핵심!!) - 하드웨어 고려해 코드 작성할 때 필요한 역량 - 나의 추구미
 - ATmega328P 데이터시트의 **Figure 14-1(Block Diagram)** 및 내부 타이밍 다이어그램 분석을 통해 도출한 하드웨어 동기화 흐름입니다.
 <img width="837" height="663" alt="image (7)" src="https://github.com/user-attachments/assets/ad92808f-f30c-410a-81f5-c68d94a23939" />
 
