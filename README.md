@@ -17,6 +17,7 @@
 <img width="837" height="663" alt="image (7)" src="https://github.com/user-attachments/assets/ad92808f-f30c-410a-81f5-c68d94a23939" />
 - 먼저 clk_Tn은 모든 데이터 경로(TCNTn, 플래그 레지스터 등)의 길목을 통제하는 Mux 활성화 신호(허가 스위치)라는 점을 인지해야 함.
 - clk_I/O랑은 다른 역할. clk_I/O는 캡처 역할임. high edge에서 업데이트 하거나 clk_Tn값을 확인하는 그런 느낌임.
+
 ### 1. 입력 및 카운터(TCNTn) 업데이트 단계
 * 본 시스템은 외부 핀 분주 대신 내부 클럭을 Prescaler로 늦춘 신호를 타이머 클럭 소스로 채택합니다.
 * 내부 타이머 레지스터를 실제로 구동하는 진짜 심장은 **`clk_I/O` (시스템 클럭)**입니다.
