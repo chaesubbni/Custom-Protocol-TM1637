@@ -38,9 +38,10 @@
 
 ## 🔬 TM1637 데이터시트 기반 프로토콜 연동
 <img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
+<img width="977" height="311" alt="image" src="https://github.com/user-attachments/assets/6b0d5982-86ac-4b11-9100-a033a7fd7c44" />
 
 
-TM1637 공식 데이터시트의 통신 규격을 바탕으로, 타이밍 마진을 고려한 소프트웨어 드라이버를 직접 설계했습니다.
+TM1637 공식 데이터시트의 통신 규격을 바탕으로, 타이밍 마진(ns 단위까지 고려)을 고려한 소프트웨어 드라이버를 직접 설계했습니다.
 
 * **Start/Stop Condition:** `CLK`이 High일 때 `DIO` 선의 에지 변화를 제어하여 통신의 시작과 종료 신호를 구현.
 * **Data Transfer (Setup/Hold):** `CLK`이 Low일 때만 `DIO`의 비트 데이터를 변경하고, `CLK`이 High로 올라가는 상승 에지(Rising Edge)에서 TM1637 칩이 데이터를 안전하게 읽어가도록 정밀한 타이밍 딜레이(`_delay_us(5)`) 설계.
