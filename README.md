@@ -15,6 +15,7 @@
 ### 회로도도 본 PWM 생성 흐름(!!핵심!!) - 하드웨어 고려해 코드 작성하는 방법의 핵심 - 나의 추구미
 - ATmega328P 데이터시트의 **Figure 14-1(Block Diagram)** 및 내부 타이밍 다이어그램 분석을 통해 도출한 하드웨어 동기화 흐름입니다.
 <img width="837" height="663" alt="image (7)" src="https://github.com/user-attachments/assets/ad92808f-f30c-410a-81f5-c68d94a23939" />
+
 - 먼저 clk_Tn은 모든 데이터 경로(TCNTn, 플래그 레지스터 등)의 길목을 통제하는 Mux 활성화 신호(허가 스위치)라는 점을 인지해야 함.
 - clk_I/O랑은 다른 역할. clk_I/O는 캡처 역할임. high edge에서 업데이트 하거나 clk_Tn값을 확인하는 그런 느낌임.
 
