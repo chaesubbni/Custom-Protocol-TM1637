@@ -1,19 +1,20 @@
 # ATmega328P-Real-Time-Clock-Base
 
 본 프로젝트는 **ATmega328P**의 내부 8비트 하드웨어 타이머(**Timer/Counter0**)를 제어하여, 소프트웨어 루프의 간섭 없이 정확한 **1초(1Hz)** 타임 베이스를 생성하고 이를 디지털 디스플레이(TM1637)에 표시하는 시스템을 구현합니다.
+데이터시트의 타이밍 차트를 분석해 직접 구현했습니다.
 
 ## 📌 Project Overview
-단순한 `_delay_ms()` 함수 사용을 지양하고, MCU의 하드웨어 자원인 **CTC(Clear Timer on Compare Match) 모드**와 **Interrupt**를 활용하여 CPU 효율을 극대화했습니다. 추가로, 외부 라이브러리에 의존하지 않고 TM1637 디스플레이 제어용 2-Wire 직렬 통신 프로토콜을 소프트웨어(Bit-banging)로 직접 구현했습니다.
+단순한 `_delay_ms()` 함수 사용을 지양하고, MCU의 하드웨어 자원인 **CTC(Clear Timer on Compare Match) 모드**와 **Interrupt**를 활용하여 CPU 효율을 극대화했습니다. 추가로, 외부 라이브러리에 의존하지 않고 TM1637 디스플레이 제어용 2-Wire 직렬 통신 프로토콜을 소프트웨어로 직접 구현했습니다.
 
 ## 🛠 Tech Stack & Environment
 * **MCU:** ATmega328P (16MHz External Crystal)
-* **Development:** Microchip Studio / AVR-GCC
-* **Protocol:** GPIO (Bit-banging), Timer/Counter0 (CTC Mode)
+* **Development:** Microchip Studio 
+* **Protocol:** GPIO, Timer/Counter0 (CTC Mode)
 * **Hardware:** TM1637 4-Digit 7-Segment Display Module
 
 ---
 
-## ⚙️ Core Register Configuration
+## Core Register Configuration
 
 본 프로젝트에서 타임 베이스(1ms 단위) 생성을 위해 조작한 핵심 레지스터 세팅 흐름입니다.
 
