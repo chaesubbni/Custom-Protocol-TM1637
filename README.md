@@ -14,7 +14,7 @@
 
 ---
 
-## Core Register Configuration
+## Timer/Counter Core Register Configuration
 
 본 프로젝트에서 타임 베이스(1ms 단위) 생성을 위해 조작한 핵심 레지스터 세팅 흐름입니다.
 <img width="837" height="663" alt="image (7)" src="https://github.com/user-attachments/assets/bde96929-d2ce-4379-a454-bd5fb53daedf" />
@@ -33,7 +33,9 @@
 ### 4. SREG (Status Register)
 * **`I-bit = 1 (sei())`**: 시스템 전역 인터럽트 활성화.
 
----
+## TM1637 통신 프로토콜
+<img width="866" height="306" alt="image" src="https://github.com/user-attachments/assets/fb11e876-fffa-4433-9751-e566f851d1a9" />
+
 
 ## 📖 System Logic Flow
 
