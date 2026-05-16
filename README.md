@@ -10,7 +10,7 @@
 4. **ISR Execution:** CPU 명령어 종료 시점 샘플링 -> PC값 스택 저장 후 `ISR(TIMER0_COMPA_vect)` 진입 및 플래그 자동 초기화.
 5. **Display:** 10ms 단위 인터럽트 100회 누적 시 `seconds` 변수 갱신 및 7-Segment 출력 시프트.
 
-### 회로도로 본 PWM 생성 흐름 - 하드웨어 고려해 코드 작성할 때 필요한 역량 - 나의 추구미
+### 회로도로 본 PWM 생성 흐름 타이밍 분석 - 하드웨어 고려해 코드 작성할 때 필요한 역량 - 나의 추구미
 - ATmega328P 데이터시트의 **Figure 14-1(Block Diagram)** 및 내부 타이밍 다이어그램 분석을 통해 도출한 하드웨어 동기화 흐름입니다.
 <img width="837" height="663" alt="image (7)" src="https://github.com/user-attachments/assets/ad92808f-f30c-410a-81f5-c68d94a23939" />
 
