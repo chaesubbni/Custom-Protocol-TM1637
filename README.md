@@ -1,8 +1,8 @@
 # Custom-Protocol-TM1637
 
 본 프로젝트는 외부 라이브러리에 전혀 의존하지 않고, ATmega328P MCU와 TM1637 모듈 간의 통신 프로토콜을 밑바닥부터 직접 구현한 프로젝트입니다. 단순히 코드를 짜맞추어 동작만 시키는 것에 그치지 않고, 데이터시트의 타이밍 차트, CPU의 명령어 처리 주기(ns), 내부 D-FF 래치 구조 그리고 외부 풀업 저항에 의한 물리적 RC 지연 시간(us)까지 정밀하게 계산하고 분석하여 us 단위에서 완벽한 동기화 제어 시스템을 구축했습니다.
-최종적으로 TM1637 모듈에 0123을 출력합니다.
-<img width="478" height="262" alt="image" src="https://github.com/user-attachments/assets/ef0d97be-53f7-4525-9e31-1ac5f897974d" />
+
+- <img width="478" height="262" alt="image" src="https://github.com/user-attachments/assets/ef0d97be-53f7-4525-9e31-1ac5f897974d" />
 
 ## 📌 Project Overview
 <img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
