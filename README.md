@@ -1,11 +1,11 @@
 # Custom-Protocol-TM1637
 
 본 프로젝트는 외부 라이브러리에 전혀 의존하지 않고, ATmega328P MCU와 TM1637 모듈 간의 통신 프로토콜을 밑바닥부터 직접 구현한 프로젝트입니다. 단순히 코드를 짜맞추어 동작만 시키는 것에 그치지 않고, 데이터시트의 타이밍 차트, CPU의 명령어 처리 주기(ns), 내부 D-FF 래치 구조 그리고 외부 풀업 저항에 의한 물리적 RC 지연 시간(us)까지 정밀하게 계산하고 분석하여 us 단위에서 완벽한 동기화 제어 시스템을 구축했습니다.
-
 - <img width="478" height="262" alt="image" src="https://github.com/user-attachments/assets/ef0d97be-53f7-4525-9e31-1ac5f897974d" />
 
 ## 📌 Project Overview
-<img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
+- <img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
+
 기존에 널리 쓰이는 외부 라이브러리나 아두이노 내장 함수를 일절 배제하고, 하드웨어의 물리적 특성을 완벽히 통제하며 2-Wire 직렬 통신(CLK, DIO)을 소프트웨어 방식(Bit-banging)으로 직접 설계했습니다. 
 **1. 데이터시트 기반의 D-Flip Flop 타이밍 제어**
 TM1637 내부의 D-FF(래치) 구조를 분석하여 데이터를 핀에 올리고 확정 짓는 타이밍을 정밀하게 제어합니다.
@@ -24,7 +24,7 @@ MCU와 TM1637이 DIO 선의 제어권을 주고받을 때(특히 9번째 클럭 
 * **High 출력:** `DDR`을 입력 모드로 전환하여 MCU는 선에서 완전히 손을 뗍니다(High-Z). 이후 외부 풀업 저항의 힘만으로 자연스럽게 5V가 채워지도록 유도하여 안전성을 극대화했습니다.
 
 ## 🔬 TM1637 데이터시트 기반 회로도 분석
-<img width="758" height="477" alt="image" src="https://github.com/user-attachments/assets/5d019174-4765-4841-8d5f-f97cfbbf379a" />
+- <img width="758" height="477" alt="image" src="https://github.com/user-attachments/assets/5d019174-4765-4841-8d5f-f97cfbbf379a" />
 
 TM1637 모듈의 통신 선(CLK, DIO)에는 외부 풀업 저항(10kΩ)과 노이즈 필터용 커패시터(100pF)가 달려 있습니다. 따라서 MCU 핀을 **입력(Input) 모드**로 전환하면, 외부 풀업 저항을 통해 해당 핀의 전압이 5V로 자연스럽게 올라갑니다.
 
