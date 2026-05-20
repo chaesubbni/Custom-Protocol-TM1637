@@ -8,6 +8,7 @@
 
 **1. 데이터시트 기반의 D-Flip Flop 타이밍 제어**
 TM1637 내부의 D-FF(래치) 구조를 분석하여 데이터를 핀에 올리고 확정 짓는 타이밍을 정밀하게 제어합니다.
+<img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
 * **Setup Time (CLK Low):** D-FF의 입력문이 닫혀 있는 동안 DIO 전선의 전압을 변경하여, 데이터가 흔들림 없이 안착할 수 있는 안정화 시간을 확보합니다.
 * **Latch (CLK Rising Edge):** CLK 전압이 올라가는 셔터 타이밍에 TM1637이 DIO 값을 정확하게 낚아채도록 동기화했습니다.
 * **Hold Time (CLK High):** Start/Stop 조건 오작동을 막기 위해 CLK이 High인 구간에서는 DIO 상태를 고정하고 칩이 데이터를 소화할 시간을 제공합니다.
@@ -23,7 +24,7 @@ MCU와 TM1637이 DIO 선의 제어권을 주고받을 때(특히 9번째 클럭 
 * **High 출력:** `DDR`을 입력 모드로 전환하여 MCU는 선에서 완전히 손을 뗍니다(High-Z). 이후 외부 풀업 저항의 힘만으로 자연스럽게 5V가 채워지도록 유도하여 안전성을 극대화했습니다.
 
 ## 🔬 TM1637 데이터시트 기반 회로도 분석
-<img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
+
 
 
 
