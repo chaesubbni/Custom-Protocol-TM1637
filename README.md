@@ -5,10 +5,9 @@
 
 ## 📌 Project Overview
 기존에 널리 쓰이는 외부 라이브러리나 아두이노 내장 함수를 일절 배제하고, 하드웨어의 물리적 특성을 완벽히 통제하며 2-Wire 직렬 통신(CLK, DIO)을 소프트웨어 방식(Bit-banging)으로 직접 설계했습니다. 
-
+<img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
 **1. 데이터시트 기반의 D-Flip Flop 타이밍 제어**
 TM1637 내부의 D-FF(래치) 구조를 분석하여 데이터를 핀에 올리고 확정 짓는 타이밍을 정밀하게 제어합니다.
-<img width="767" height="211" alt="image" src="https://github.com/user-attachments/assets/0ebe5cf4-0721-4ba7-aeb9-a91833758f9e" />
 * **Setup Time (CLK Low):** D-FF의 입력문이 닫혀 있는 동안 DIO 전선의 전압을 변경하여, 데이터가 흔들림 없이 안착할 수 있는 안정화 시간을 확보합니다.
 * **Latch (CLK Rising Edge):** CLK 전압이 올라가는 셔터 타이밍에 TM1637이 DIO 값을 정확하게 낚아채도록 동기화했습니다.
 * **Hold Time (CLK High):** Start/Stop 조건 오작동을 막기 위해 CLK이 High인 구간에서는 DIO 상태를 고정하고 칩이 데이터를 소화할 시간을 제공합니다.
