@@ -1,17 +1,25 @@
-# ATmega328P-Real-Time-Clock-Base with TM1637
+# Custom-Protocol-TM1637
 
-본 프로젝트는 ATmega328P의 내부 8비트 하드웨어 타이머(Timer/Counter0)를 활용하여 메인 루프의 간섭 없이 정확한 1초(1Hz) 타임 베이스를 생성합니다. 특히 외부 라이브러리에 의존하지 않고 데이터시트의 타이밍 차트를 직접 분석해, TM1637 디스플레이 모듈과의 정밀한 통신 및 동기화 시스템을 밑바닥부터 구현했습니다.
+본 프로젝트는 외부 라이브러리에 전혀 의존하지 않고, ATmega328P MCU와 TM1637 모듈 간의 통신 프로토콜을 밑바닥부터 직접 구현한 프로젝트입니다. 단순히 코드를 짜맞추어 동작만 시키는 것에 그치지 않고, 데이터시트의 타이밍 차트, CPU의 명령어 처리 주기(ns), 내부 D-FF 래치 구조 그리고 외부 풀업 저항에 의한 물리적 RC 지연 시간(us)까지 정밀하게 계산하고 분석하여 us 단위에서 완벽한 동기화 제어 시스템을 구축했습니다.
 
 ## 📌 Project Overview
-단순한 `_delay_ms()` 함수 사용을 지양하고, MCU의 하드웨어 자원인 **CTC(Clear Timer on Compare Match) 모드**와 **Interrupt**를 활용하여 CPU 효율을 극대화했습니다. 
+기존에 널리 쓰이는 외부 라이브러리나 아두이노 내장 함수를 일절 배제하고, 하드웨어의 물리적 특성을 완벽히 통제하며 2-Wire 직렬 통신(CLK, DIO)을 소프트웨어 방식(Bit-banging)으로 직접 설계했습니다. 
 
-특히, 외부 라이브러리에 의존하지 않고 **TM1637 데이터시트의 전송 타이밍 규격(Interface Interpretation)**을 분석하여, CLK와 DIO 핀을 제어하는 2-Wire 직렬 통신 프로토콜을 소프트웨어(Bit-banging)로 직접 구현 및 연동했습니다.
+**1. 데이터시트 기반의 D-Flip Flop 타이밍 제어**
+TM1637 내부의 D-FF(래치) 구조를 분석하여 데이터를 핀에 올리고 확정 짓는 타이밍을 정밀하게 제어합니다.
+* **Setup Time (CLK Low):** D-FF의 입력문이 닫혀 있는 동안 DIO 전선의 전압을 변경하여, 데이터가 흔들림 없이 안착할 수 있는 안정화 시간을 확보합니다.
+* **Latch (CLK Rising Edge):** CLK 전압이 올라가는 셔터 타이밍에 TM1637이 DIO 값을 정확하게 낚아채도록 동기화했습니다.
+* **Hold Time (CLK High):** Start/Stop 조건 오작동을 막기 위해 CLK이 High인 구간에서는 DIO 상태를 고정하고 칩이 데이터를 소화할 시간을 제공합니다.
 
-## 🛠 Tech Stack & Environment
-* **MCU:** ATmega328P (16MHz External Crystal)
-* **Development:** Microchip Studio / AVR-GCC
-* **Protocol:** GPIO (Bit-banging), Timer/Counter0 (CTC Mode)
-* **Hardware:** TM1637 4-Digit 7-Segment Display Module
+**2. RC 지연(Delay) 및 CPU 클럭 사이클 계산**
+`_delay_us()`는 무작정 넣은 대기 시간이 아닙니다. 회로의 물리적 시상수(τ)와 CPU 명령어 처리 속도를 계산하여 도출한 **최적의 안전 마진(5us)**입니다.
+* **CPU 처리 속도:** ATmega328P(16MHz)의 1주기는 62.5ns이며, 비트 제어 명령어(`CBI`, `SBI` 등 Read-Modify-Write)는 단 2주기(125ns)만에 실행이 완료됩니다.
+* **RC 지연 극복:** 모듈의 10kΩ 풀업 저항과 100pF 커패시터(노이즈 필터)에 의한 시상수(τ)는 1us입니다. 핀을 놓았을 때(High) 5V까지 안정적으로 도달(95% 이상)하려면 최소 3us가 소요됩니다. CPU의 제어 속도가 전압 상승 속도보다 압도적으로 빠르기 때문에 발생하는 신호 꼬임을 방지하고자 5us의 의도적인 지연을 배치했습니다.
+
+**3. Open-Drain 방식을 통한 과전류(Short Circuit) 보호**
+MCU와 TM1637이 DIO 선의 제어권을 주고받을 때(특히 9번째 클럭 ACK 수신 시) 양측이 서로 다른 전압(5V와 0V)을 뿜어내어 칩이 타버리는 버스 충돌 현상을 원천 차단했습니다.
+* **Low 출력:** `DDR`을 출력 모드로 설정하여 내부 GND 스위치를 닫고 전압을 0V로 강하게 끌어내립니다 (Sink).
+* **High 출력:** `DDR`을 입력 모드로 전환하여 MCU는 선에서 완전히 손을 뗍니다(High-Z). 이후 외부 풀업 저항의 힘만으로 자연스럽게 5V가 채워지도록 유도하여 안전성을 극대화했습니다.
 
 ---
 
